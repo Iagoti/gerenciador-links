@@ -7,6 +7,7 @@ import { Categories } from "@/components/categories";
 import { Input } from "@/components/input";
 import { Button } from "@/components/button";
 import { useState } from "react";
+import { linkStorage } from "@/storage/link-storage";
 
 export default function add(){
 
@@ -14,19 +15,32 @@ export default function add(){
     const [name, setName] = useState("");
     const [url, setUrl] = useState("");
 
-    function handleAdd(){
-        if(!category){
-            return Alert.alert("Categoria","Selecione uma categoria");
-        }
+    async function handleAdd(){
+       try{
+            if(!category){
+                return Alert.alert("Categoria","Selecione uma categoria");
+            }
 
-        if(!name.trim()){
-            return Alert.alert("Nome", "Informe o nome do item");
-        }
+            if(!name.trim()){
+                return Alert.alert("Nome", "Informe o nome do item");
+            }
 
-        if(!url.trim()){
-            return Alert.alert("URL", "Informe a url");
-        }
-        console.log({category, name, url});
+            if(!url.trim()){
+                return Alert.alert("URL", "Informe a url");
+            }
+
+            await linkStorage.save({
+                id: new Date().getTime().toString(),
+                name,
+                url,
+                category
+            });
+
+            Alert.alert("Sucesso", "Link salvo com sucesso.", [{ text: "OK", onPress: () => router.back() }]);
+       } catch(error){
+            Alert.alert("Erro", "Não foi possível salvar o link.");
+            console.log(error);
+       }
     }
     
     return (
@@ -43,7 +57,7 @@ export default function add(){
 
             <View style={styles.form}>
                 <Input placeholder="Nome" onChangeText={setName} />
-                <Input placeholder="Url " onChangeText={setUrl} />
+                <Input placeholder="Url " onChangeText={setUrl} autoCorrect={false} autoCapitalize="none" />
                 <Button title="Adicionar" onPress={handleAdd} />
             </View>
         </View>
